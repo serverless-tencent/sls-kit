@@ -1,6 +1,6 @@
 {
   "name": "sls-kit",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "description": "",
   "main": "./index.js",
   "bin": "./lib/index.js",
