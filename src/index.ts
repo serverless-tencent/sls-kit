@@ -37,9 +37,9 @@ const copyProvisionCommandModule: yargs.CommandModule = {
         }
 
         console.log("Functions and region:");
-        console.log(util.inspect({ functions, region }, { depth: null }));
+        console.log(util.inspect({ functionList, region }, { depth: null }));
 
-        await copyProvision(functions, region);
+        await copyProvision(functionList, region);
     },
 };
 
