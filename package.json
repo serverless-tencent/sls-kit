@@ -1,0 +1,24 @@
+{
+  "name": "sls-kit",
+  "version": "1.0.5",
+  "description": "",
+  "main": "./index.js",
+  "bin": "./lib/index.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/js-yaml": "^4.0.3",
+    "@types/lodash": "^4.14.172",
+    "@types/yargs": "^17.0.2",
+    "dotenv": "^10.0.0",
+    "js-yaml": "^4.1.0",
+    "lodash": "^4.17.21",
+    "tencent-component-toolkit": "^2.20.0",
+    "yargs": "^16.0.0"
+  }
+}
