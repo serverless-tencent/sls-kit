@@ -15,6 +15,7 @@ function parseServerlessYaml(str: string) {
 }
 const copyProvisionCommandModule: yargs.CommandModule = {
     command: 'copy-provision',
+    describe: '从当前目录的 serverless.yml 读取 Multi-Scf 的函数列表，复制这些函数当前 $DEFAULT 流量的预置，并等待复制完毕后切换到当前最新的版本（以数字标识）因 Serverless Framework CLI 有 10m 超时时间，等待预置易导致超时，故在此添加预置切换命令\n',
     handler: async () => {
         const str = fs.readFileSync('./serverless.yml', { encoding: 'utf-8' });
         const data = parseServerlessYaml(str) as any;
@@ -42,4 +43,19 @@ const copyProvisionCommandModule: yargs.CommandModule = {
     },
 };
 
-yargs(hideBin(process.argv)).command(copyProvisionCommandModule).help().argv;
+const parseYmlCommandModule: yargs.CommandModule = {
+    command: 'parse-yml',
+    describe: '读取当前目录的 serverless.yml，解析其中的 ${env:xxx}, ${xxx} 等变量，并生成 serverless.parse.yml\n',
+    handler: async () => {
+        const str = fs.readFileSync('./serverless.yml', { encoding: 'utf-8' });
+        const data = parseServerlessYaml(str) as any;
+        console.log("Parse serverless.yml:");
+        console.log(util.inspect(data, { depth: null }));
+
+        fs.writeFileSync('./serverless.parse.yml', yaml.dump(data));
+    },
+};
+
+yargs(hideBin(process.argv))
+    .command(copyProvisionCommandModule)
+    .command(parseYmlCommandModule).help().argv;
