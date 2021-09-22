@@ -1,0 +1,162 @@
+component: multi-scf
+name: web-record
+app: web-record-1-0-12
+inputs:
+  src:
+    src: ./
+    exclude:
+      - .env
+      - record/**
+      - node_modules/**
+      - transcode/**
+      - docker/**
+      - dist/**
+      - scripts/**
+  region: ap-beijing
+  runtime: Nodejs12.16
+  role: SCF_QcsRole
+  memorySize: 256
+  isAutoPublish: true
+  timeout: 90
+  msgTTL: 21600
+  retryNum: 0
+  vpc:
+    vpcId: undefined
+    subnetId: undefined
+  environments:
+    - key: SLS_APP_NAME
+      value: web-record-1-0-12
+    - key: ENV
+      value: undefined
+    - key: APP_VERSION
+      value: undefined
+    - key: VPC_ID
+      value: undefined
+    - key: SUBNET_ID
+      value: undefined
+    - key: REGION
+      value: ap-beijing
+    - key: COS_BUCKET
+      value: undefined
+    - key: CDN_DOMAIN
+      value: undefined
+    - key: REDIS_HOST
+      value: undefined
+    - key: REDIS_PORT
+      value: undefined
+    - key: REDIS_AUTH
+      value: undefined
+    - key: REDIS_INDEX
+      value: undefined
+    - key: CFS_ID
+      value: undefined
+    - key: MOUNT_ID
+      value: undefined
+    - key: RECORD_IMAGE_URL
+      value: undefined
+    - key: REGISTRY_ID
+      value: undefined
+    - key: TRANSCODE_IMAGE_URL
+      value: undefined
+  functions:
+    callback:
+      name: web-record-1-0-12-callback
+      src: ./callback
+      handler: index.main_handler
+      memorySize: 512
+      asyncRunEnable: true
+      traceEnable: true
+    upload:
+      name: web-record-1-0-12-upload
+      src: ./upload
+      handler: index.main_handler
+      memorySize: 512
+      timeout: 7200
+      asyncRunEnable: true
+      traceEnable: true
+      cfs:
+        - cfsId: undefined
+          mountInsId: undefined
+          localMountDir: /mnt/
+          remoteMountDir: /
+    transcode:
+      name: web-record-1-0-12-transcode
+      memorySize: 3072
+      timeout: 7200
+      asyncRunEnable: true
+      traceEnable: true
+      image:
+        imageUrl: undefined
+        imageType: public
+        registryId: undefined
+      cfs:
+        - cfsId: undefined
+          mountInsId: undefined
+          localMountDir: /mnt/
+          remoteMountDir: /
+    record:
+      name: web-record-1-0-12-record
+      memorySize: 3072
+      timeout: 86400
+      asyncRunEnable: true
+      traceEnable: true
+      image:
+        imageUrl: undefined
+        imageType: public
+        registryId: undefined
+      cfs:
+        - cfsId: undefined
+          mountInsId: undefined
+          localMountDir: /mnt/
+          remoteMountDir: /
+    dispatch:
+      name: web-record-1-0-12-dispatch
+      memorySize: 256
+      src: ./dispatch
+      handler: index.main_handler
+    diagnose:
+      name: web-record-1-0-12-diagnose
+      memorySize: 256
+      timeout: 150
+      src: ./diagnose
+      handler: index.main_handler
+  triggers:
+    - type: timer
+      function: dispatch
+      parameters:
+        name: dispatch_timer
+        cronExpression: 0 */10 * * * * *
+        enable: true
+        argument: Active
+    - type: timer
+      function: diagnose
+      parameters:
+        name: diagnose_timer
+        cronExpression: '*/30 * * * * * *'
+        enable: true
+        argument: argument
+    - type: timer
+      function: record
+      parameters:
+        name: record_timer
+        cronExpression: 0 */10 * * * * *
+        enable: true
+        argument: Active
+    - type: apigw
+      parameters:
+        name: web_record
+        protocols:
+          - http
+          - https
+        description: Serverless web-record API GW
+        environment: release
+        apis:
+          - path: /record
+            apiName: dispatch_api
+            method: POST
+            description: Serverless REST API
+            enableCORS: true
+            responseType: JSON
+            serviceTimeout: 90
+            authType: APP
+            function: dispatch
